@@ -31,6 +31,22 @@ Um Moodle für ca. 600 Schüler und 25 Lehrkräfte performant zu betreiben, wird
 
 **Wichtiger Hinweis:** Diese Ressourcen sind in der Spezifikation des zentralen Servers (Dell PowerEdge R750) **bereits berücksichtigt und eingeplant.**
 
+**Architektur-Schaubild**
+
+Zur visuellen Veranschaulichung der geplanten technischen Architektur dient das folgende Schaubild. Es zeigt das Zusammenspiel der zentralen Komponenten vom Benutzerzugriff bis zur Datenspeicherung.
+
+![image](Modell.png "Diagramm")
+
+**Erläuterung des Schaubilds:**
+
+**Zentraler Host:** Der physische Server "Dell PowerEdge R750" bildet die Hardware-Grundlage. Darauf läuft die Virtualisierungssoftware Hyper-V, die den Betrieb mehrerer unabhängiger Systeme ermöglicht.
+
+**Virtuelle Maschinen (VMs):** Für die Lernplattform wird eine eigene VM mit dem Betriebssystem Ubuntu Server aufgesetzt. Eine zweite VM dient als Domain Controller zur Verwaltung der Benutzerkonten.
+
+**Hybrid-Speicher:** Die Moodle-VM greift auf zwei Speichertypen zu. Das schnelle SSD-Array wird für das Betriebssystem und die Datenbank genutzt, um kurze Ladezeiten zu garantieren. Das große HDD-Array mit 20TB speichert die eigentlichen Kursinhalte (Dokumente, Videos etc.).
+
+**Netzwerkzugriff:** Interne Nutzer greifen über das Schulnetzwerk (LAN/WLAN) auf den Server zu. Lehrkräfte im Homeoffice können sich über eine sichere VPN-Verbindung mit dem Netzwerk verbinden und haben so den gleichen Zugriff auf die Plattform.
+
 #### **3. Kostenanalyse für Moodle**
 
 Obwohl Moodle selbst kostenlos ist, verursacht der Betrieb indirekte Kosten, die im Projektbudget bereits enthalten sind:
