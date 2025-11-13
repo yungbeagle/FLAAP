@@ -99,7 +99,6 @@
 * moodle, open source software, dass daten eu nicht verlassen
 
 
-
 #### **6. Abnahme und Betrieb**
 
 *   **6.1 Projektabschluss:** Woran messen Sie am Ende den Erfolg des Projekts? Was muss erfüllt sein, damit Sie sagen: „Ja, das Projekt ist erfolgreich abgeschlossen“?
