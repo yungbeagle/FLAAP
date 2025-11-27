@@ -11,121 +11,76 @@
 
 ---
 
-### 1. Einleitung und Ausgangssituation
+### 1. Ausgangssituation und Zielsetzung
 
-#### 1.1 Projektziel
-Ziel des Projektes ist die Konzeption und Implementierung einer zukunftsfähigen, skalierbaren IT-Infrastruktur für den Neubau der Hans-Memling-Schule.
-Der Fokus liegt auf **digitaler Souveränität** und **Kosteneffizienz**. Es soll eine reine **Open-Source-Lösung (Linux-basiert)** realisiert werden, um Lizenzkosten zu minimieren und die volle Datenhoheit im Haus zu behalten (On-Premise). Das System muss so gestaltet sein, dass der laufende Betrieb durch eine Lehrkraft (mit mathematisch-technischem Hintergrund, aber begrenzten Zeitressourcen) verwaltet werden kann.
+#### 1.1 Ist-Zustand
+Die Hans-Memling-Schule bezieht einen Neubau. Es ist keine aktive IT-Infrastruktur (Server, Switches, WLAN) vorhanden ("Greenfield"). Ein klimatisierter Serverraum sowie eine strukturierte Gebäude-Verkabelung (LAN-Dosen) werden bauseitig bereitgestellt. Es existiert kein Budget für jährlich wiederkehrende Lizenzkosten pro Benutzer.
 
-#### 1.2 Ist-Zustand
-*   **Gebäude:** Es handelt sich um einen Erstbezug ("Greenfield"-Projekt). Es ist keine aktive IT-Infrastruktur vorhanden. Ein anderer Dienstleister kümmert sich um die Verlegung der Netzwerk-Kabel.
-*   **Infrastruktur:** Ein zentraler Serverraum (klimatisiert, abschließbar) ist vorhanden. Eine strukturierte Netzwerkverkabelung (LAN-Dosen in den Räumen) wird bauseitig vorausgesetzt.
-*   **Hardware/Software:** Keine Bestandsgeräte oder Lizenzen vorhanden.
+#### 1.2 Projektziel
+Ziel ist die Herstellung der Betriebsbereitschaft einer IT-Infrastruktur zum ersten Schultag. Das System soll die **digitale Souveränität** der Schule sichern (Datenhaltung im eigenen Haus) und langfristig kosteneffizient sein (Vermeidung von "Vendor-Lock-in").
 
-#### 1.3 Zielgruppen und Mengengerüst
-Das System ist für folgende Benutzerzahlen auszulegen (mit Puffer für Wachstum in den nächsten 3 Jahren):
-*   **Schüler:** 600 – 800
-*   **Lehrkräfte:** 25 – 30
-*   **Verwaltung:** Schulleitung und Sekretariat.
+#### 1.3 Zielgruppen
+Das System muss für ca. 800 Schüler und 30 Lehrkräfte ausgelegt sein, mit einer Reserve für zukünftiges Wachstum.
 
 ---
 
-### 2. Funktionale Anforderungen
+### 2. Funktionale Anforderungen (Was muss das System tun?)
 
-#### 2.1 Benutzerverwaltung und Authentifizierung
-*   **Zentrales Verzeichnis:** Einrichtung eines zentralen Benutzerverzeichnisses (LDAP / Samba 4) zur Verwaltung aller Identitäten.
-*   **Single Sign-On (SSO):** Die Benutzeranmeldung soll einheitlich erfolgen ("Ein Passwort für alles"). Dies gilt für die Windows-Clients, das WLAN und die Lernplattform Moodle.
-*   **Verwaltungsoberfläche:** Da die Administration durch eine Lehrkraft erfolgt, ist zwingend eine **grafische, webbasierte Benutzeroberfläche (Web-GUI)** erforderlich. Die Erstellung von Benutzern, das Zurücksetzen von Passwörtern und die Zuweisung zu Klassen/Gruppen muss ohne Nutzung der Linux-Kommandozeile möglich sein.
-*   **Rollenkonzept:** Abbildung verschiedener Berechtigungen für "Schüler", "Lehrer", "Verwaltung" und "Gäste" (Role Based Access Control).
+#### 2.1 Administration und Benutzermanagement
+*   **Anforderung 2.1.1 (Einfache Verwaltung):** Da die Administration durch eine Lehrkraft (ohne tiefe Server-Kenntnisse) erfolgt, **muss** die Verwaltung der Benutzer, Gruppen und Rechte über eine intuitive, grafische Web-Oberfläche möglich sein. Die Nutzung einer Kommandozeile darf für Standardaufgaben nicht notwendig sein.
+*   **Anforderung 2.1.2 (Single Sign-On):** Benutzer sollen sich mit *einem* zentralen Account an allen Diensten (PCs, WLAN, Lernplattform) anmelden können.
+*   **Anforderung 2.1.3 (Hierarchie):** Die Schulleitung benötigt Rechte, um hierarchische Strukturen (Klassen, Kurse) anzulegen.
 
-#### 2.2 Dateidienste und Speicher
-*   **Persönliche Laufwerke:** Bereitstellung persönlicher Home-Verzeichnisse für jeden Benutzer (Lehrer und Schüler).
-*   **Tauschlaufwerke:** Einrichtung von Gruppenlaufwerken für Klassen, Fachbereiche und das Lehrerkollegium.
-*   **Protokolle:** Zugriff über SMB/CIFS für volle Kompatibilität mit Windows-Clients und BYOD-Geräten.
+#### 2.2 Dateiablage und Zugriff
+*   **Anforderung 2.2.1 (Speicherbereiche):** Das System muss persönliche Speicherbereiche für jeden Benutzer sowie gemeinsame Austauschlaufwerke für Klassen und Lehrer bereitstellen.
+*   **Anforderung 2.2.2 (Kompatibilität):** Der Zugriff auf Dateien muss von gängigen Betriebssystemen (Windows, macOS, Linux) nativ möglich sein.
+*   **Anforderung 2.2.3 (Fernzugriff):** Lehrkräfte müssen in der Lage sein, von extern sicher (verschlüsselt) auf ihre schulischen Daten zuzugreifen.
 
-#### 2.3 Netzwerk und WLAN
-*   **Abdeckung:** Eine stabile WLAN-Abdeckung ist in folgenden Bereichen zu gewährleisten:
-    *   Alle Klassenzimmer.
-    *   Verwaltungsräume und Lehrerzimmer.
-    *   *Hinweis:* Eine Ausleuchtung der Flure ist **nicht** gefordert.
-*   **Netzwerksegmentierung:** Trennung des Datenverkehrs mittels VLANs (z.B. Management, Lehrernetz, Schülernetz, Gäste).
-*   **Gast-Zugang:** Einrichtung eines isolierten Gast-WLANs für Referenten (Zugang via temporäres Passwort/Voucher).
-*   **Performance:** Das Netzwerk muss HD-Streaming in mehreren Klassenräumen gleichzeitig ermöglichen.
+#### 2.3 Netzwerkinfrastruktur
+*   **Anforderung 2.3.1 (WLAN-Abdeckung):** Eine stabile WLAN-Verbindung ist zwingend in allen Klassenzimmern sowie im Verwaltungsbereich erforderlich. Eine Abdeckung der Flure ist explizit **nicht** gefordert.
+*   **Anforderung 2.3.2 (Netzwerktrennung):** Das Netz muss logisch getrennt sein, um sensible Verwaltungsdaten vom Schülerverkehr und Gastzugängen abzuschirmen.
+*   **Anforderung 2.3.3 (Gastzugang):** Es muss eine Möglichkeit geben, Gästen (z.B. Referenten) zeitlich begrenzten Internetzugriff zu gewähren (z.B. via Voucher).
 
 #### 2.4 Lernplattform (LMS)
-*   **Software:** Installation und Konfiguration von **Moodle**.
-*   **Integration:** Anbindung an das zentrale Benutzerverzeichnis (LDAP) zur Authentifizierung.
-*   **Funktionen:** Bereitstellung von Kursen, Dateien, Upload-Möglichkeiten und Foren.
-*   **Hierarchie:** Abbildung einer hierarchischen Kursstruktur (Kategorien) für die Schulleitung.
+*   **Anforderung 2.4.1 (Software):** Gemäß Kundenwunsch ist die Lernplattform **Moodle** einzurichten.
+*   **Anforderung 2.4.2 (Erreichbarkeit):** Die Plattform muss sowohl aus dem internen Netz als auch über das Internet für alle Nutzer erreichbar sein.
 
-#### 2.5 Fernzugriff (Remote Access)
-*   **VPN:** Einrichtung eines VPN-Zugangs für Lehrkräfte, um von extern sicher auf die internen Dateilaufwerke zugreifen zu können.
-*   **Web-Zugriff:** Moodle muss für alle Nutzer (auch Schüler) über das Internet erreichbar sein.
-
-#### 2.6 Projektmanagement-Tool
-*   Auswahl und Bereitstellung einer Softwarelösung zur Unterstützung der Schulleitung bei Entwicklungsprojekten (z.B. Kanboard, OpenProject oder vergleichbare Open-Source-Lösungen, alternativ Cloud-Dienst nach DSGVO-Prüfung).
+#### 2.5 Projektmanagement
+*   **Anforderung 2.5.1:** Bereitstellung einer Softwarelösung zur Unterstützung der Schulleitung bei der Planung und Überwachung von Schulprojekten.
 
 ---
 
-### 3. Nicht-funktionale Anforderungen
+### 3. Nicht-funktionale Anforderungen (Wie gut muss das System sein?)
 
-#### 3.1 Datensicherheit und Datenschutz
-*   **Datensouveränität:** Alle sensiblen Daten (insbesondere personenbezogene Daten von Schülern) müssen auf den schuleigenen Servern verbleiben.
-*   **Backup:** Implementierung einer automatisierten, täglichen Datensicherung aller VMs und Datenbestände.
-*   **Disaster Recovery:** Die Wiederherstellbarkeit des Gesamtsystems nach einem Hardwareausfall muss dokumentiert und gewährleistet sein.
+#### 3.1 Wirtschaftlichkeit und Lizenzen
+*   **Anforderung 3.1.1:** Um laufende Kosten zu minimieren, soll vorrangig auf **Open-Source-Software** gesetzt werden.
+*   **Anforderung 3.1.2:** Es sollen keine Lösungen implementiert werden, die Lizenzkosten pro Benutzer (CALs) verursachen.
 
-#### 3.2 Verfügbarkeit und Wartbarkeit
-*   **Betriebszeit:** Das System muss zu den Schulzeiten hochverfügbar sein. Wartungsfenster und kürzere Ausfälle sind am Wochenende oder in den Ferien akzeptabel.
-*   **USV:** Absicherung der zentralen Server- und Netzwerkkomponenten gegen Stromausfälle und Spannungsschwankungen. Automatisches Herunterfahren (Shutdown) des Servers bei kritischem Batteriestand.
+#### 3.2 Datensicherheit und Datenschutz
+*   **Anforderung 3.2.1 (Datensouveränität):** Personenbezogene Daten (Noten, Schülerakten) müssen auf schuleigenen Servern gespeichert werden (On-Premise). Eine Speicherung in einer Public Cloud ist für sensible Daten unzulässig.
+*   **Anforderung 3.2.2 (Backup):** Eine automatisierte, tägliche Datensicherung aller Systemkomponenten ist einzurichten.
 
-#### 3.3 Systemumgebung
-*   **Open Source First:** Es sollen primär Open-Source-Technologien (Linux, Samba, Moodle, Proxmox/KVM) eingesetzt werden, um Lizenzkosten dauerhaft niedrig zu halten und Vendor-Lock-in zu vermeiden.
-
----
-
-### 4. Technische Rahmenbedingungen
-
-#### 4.1 Server-Hardware
-*   **Typ:** 1x Physischer Server (Rackmount), ausgelegt für Virtualisierung.
-*   **Leistung:** Ausreichend Ressourcen für ca. 850 Benutzer (Empfehlung: mind. 128 GB RAM, performanter Multi-Core Prozessor).
-*   **Storage:** Hybrider Speicher oder All-Flash für optimale Datenbank-Performance (Moodle) bei gleichzeitig hoher Kapazität für Dateien.
-
-#### 4.2 Software-Stack (Soll-Konzept)
-*   **Virtualisierung:** Proxmox VE oder vergleichbarer Open-Source Hypervisor.
-*   **Betriebssysteme:** Linux (z.B. Debian Stable, Ubuntu LTS).
-*   **Identity Management:** Univention Corporate Server (Core), Linuxmuster.net oder vergleichbare Lösung mit GUI.
-
-#### 4.3 Netzwerkhardware
-*   19-Zoll Serverschrank (42 HE).
-*   Core-Switch (Managed, Layer 2/3).
-*   Access-Switches mit PoE+ (Power over Ethernet) für die Versorgung der Access Points.
-*   Wi-Fi 6 Access Points.
+#### 3.3 Verfügbarkeit und Performance
+*   **Anforderung 3.3.1:** Das System muss leistungsfähig genug sein, um Video-Streaming in HD-Qualität in mehreren Klassenräumen gleichzeitig zu ermöglichen.
+*   **Anforderung 3.3.2:** Kritische Hardwarekomponenten müssen gegen Stromausfall und Spannungsschwankungen abgesichert sein.
 
 ---
 
-### 5. Lieferumfang und Abnahme
+### 4. Lieferumfang und Rahmenbedingungen
 
-#### 5.1 Zu erbringende Leistungen
-1.  Beschaffung und Lieferung der Hardware.
-2.  Einbau der Komponenten in den Serverraum.
-3.  Installation der Virtualisierungsumgebung.
-4.  Einrichtung der Linux-Server-VMs (Domain Controller, File Server, Moodle Server).
-5.  Konfiguration der Netzwerkinfrastruktur (VLANs, WLAN-SSIDs).
-6.  Einrichtung der VPN-Lösung.
-7.  Einweisung des IT-Verantwortlichen (Mathelehrer) in die Verwaltungsoberfläche.
+Der Auftragnehmer ist verantwortlich für:
+1.  Lieferung und physikalischen Einbau der notwendigen Server- und Netzwerkkomponenten in das vorhandene Rack.
+2.  Installation und Konfiguration der Software gemäß den oben genannten Anforderungen.
+3.  Erstellung einer Dokumentation (Netzwerkpläne, Installationsberichte).
+4.  Einweisung des administrierenden Lehrpersonals.
 
-#### 5.2 Dokumentation
-Dem Auftraggeber sind nach Projektabschluss folgende Unterlagen zu übergeben:
-*   Netzwerkplan (Topologie).
-*   IP-Adressplan und VLAN-Konfiguration.
-*   Passwortliste (Übergabe an Schulleitung).
-*   Administrationshandbuch (Schwerpunkt: Benutzer anlegen, Backup prüfen, Moodle-Grundlagen).
-*   Notfallplan für Wiederherstellung.
+---
 
-#### 5.3 Abnahmekriterien
-Das Projekt gilt als erfolgreich abgenommen, wenn:
-*   Die Hardware fehlerfrei läuft.
-*   Ein Test-Benutzer (Schüler) sich erfolgreich im WLAN und Moodle anmelden kann.
-*   Ein Test-Benutzer (Lehrer) von extern per VPN auf sein Laufwerk zugreifen kann.
-*   Ein Backup erfolgreich erstellt und testweise wiederhergestellt wurde.
-*   Das System bis zum vereinbarten Stichtag (Erster Schultag / Ende Testphase) betriebsbereit ist.
+### 5. Abnahmekriterien (Überprüfbarkeit)
+
+Die Abnahme erfolgt durch Prüfung der folgenden Kriterien am lebenden System:
+1.  **Funktionstest WLAN:** Ein Endgerät erhält in einem Klassenzimmer stabilen Empfang und Internetzugriff.
+2.  **Funktionstest Login:** Ein Test-Benutzer kann sich mit identischen Zugangsdaten an einem PC und in Moodle anmelden.
+3.  **Funktionstest Admin-GUI:** Der IT-Verantwortliche kann über die Web-Oberfläche eigenständig einen neuen Schüler anlegen und dessen Passwort zurücksetzen, ohne die Konsole zu nutzen.
+4.  **Funktionstest VPN:** Zugriff auf das Home-Laufwerk von einem externen Anschluss ist erfolgreich.
+5.  **Dokumentation:** Vollständige Übergabe der Pläne und Zugangsdaten.
